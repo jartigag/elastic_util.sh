@@ -1,7 +1,7 @@
 #!/bin/bash
 # -*- coding: utf-8 -*-
 #
-# v0.1 (@jartigag, 2019-11-08)
+# v0.2 (@jartigag, 2019-11-11)
 #
 # algunas queries útiles para elasticsearch (probado en v6.2.4)
 #
@@ -29,6 +29,7 @@ function error_exit()
     echo -e "- listar
 - crear nombre_indice mapping.json
 - insertar nombre_indice datos.json
+- mapping nombre_indice
 - eliminar nombre_indice"
     echo ""
     echo -e "- filtrar nombre_indice \"msg:error and @timestamp:[2019-11-09T00:00:00.000Z TO now]\"
@@ -89,6 +90,18 @@ then
 {\"index\":{}}
 {\"campo1\":\"valor1deldocumentoB\",\"campo2\":\"valor2deldocumentoB\"}
 "
+        else
+            echo -e "\033[93m[!] faltan argumentos\033[0m"
+            error_exit
+        fi
+
+
+
+    elif [[ $action == "mapping" ]]
+    then
+        if [[ -n $index_name ]]
+        then
+            query "ver el mapping del índice \`$index_name\`" "curl $ip:$port/$index_name/_mapping"
         else
             echo -e "\033[93m[!] faltan argumentos\033[0m"
             error_exit

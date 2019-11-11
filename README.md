@@ -8,6 +8,7 @@ acciones:
 - listar
 - crear nombre_indice mapping.json
 - insertar nombre_indice datos.json
+- mapping nombre_indice
 - eliminar nombre_indice
 
 - filtrar nombre_indice "msg:error and @timestamp:[2019-11-09T00:00:00.000Z TO now]"
