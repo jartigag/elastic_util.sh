@@ -19,5 +19,5 @@ ejemplos:
 - hacer legible un output en JSON:
 elastic_util.sh filtrar importer-miprocesado2019.10 "campo1:100" 2>/dev/null | python -m json.tool | less
 - listar los índices con el mes actual en su nombre:
-elastic_util.sh ls 2>/dev/null | grep 2019.11
+elastic_util.sh ls | grep 2019.11
 ```
