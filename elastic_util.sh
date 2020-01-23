@@ -1,7 +1,7 @@
 #!/bin/bash
 # -*- coding: utf-8 -*-
 #
-# v0.2 (@jartigag, 2019-11-11)
+# v0.3 (@jartigag, 2020-01-23)
 #
 # algunas queries útiles para elasticsearch (probado en v6.2.4)
 #
@@ -24,7 +24,7 @@ function error_exit()
 {
     echo -e "\033[1muso: elastic_util.sh [acción] [argumentos]"
     echo ""
-	echo -e "acciones:"
+    echo -e "acciones:"
     echo ""
     echo -e "- listar
 - crear nombre_indice mapping.json
@@ -38,17 +38,19 @@ function error_exit()
   echo -e "ejemplos:"
   echo ""
   echo -e "- hacer legible un output en JSON: \nelastic_util.sh filtrar importer-miprocesado2019.10 \"campo1:100\" 2>/dev/null | python -m json.tool | less"
-  echo -e "- listar los índices con el mes actual en su nombre: \nelastic_util.sh ls 2>/dev/null | grep 2019.11"
+  echo -e "- listar los índices con el mes actual en su nombre: \nelastic_util.sh ls | grep 2019.11"
 }
 
 if [[ -n $action ]]
 then
 
-	if [[ $action == "listar" || $action == "ls" ]]
-	then
+    if [[ $action == "listar" ]]
+    then
        query "listar todos los índices" "curl $ip:$port/_cat/indices?v"
 
-
+    elif [[ $action == "ls" ]]
+    then
+       query "listar todos los índices" "curl $ip:$port/_cat/indices?v" 2>/dev/null
 
     elif [[ $action == "crear" ]]
     then #docs: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/indices-put-mapping.html
@@ -110,7 +112,7 @@ then
 
 
     elif [[ $action == "eliminar" ]]
-	then
+    then
         if [[ -n $index_name ]]
         then
             query "eliminar el índice \`$index_name\`" "curl -XDELETE $ip:$port/$index_name"
