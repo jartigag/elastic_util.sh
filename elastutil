@@ -1,9 +1,8 @@
 #!/bin/bash
-# -*- coding: utf-8 -*-
 #
-# v0.3 (@jartigag, 2020-01-23)
+# v0.4 (@jartigag, 2021-03-11)
 #
-# algunas queries útiles para elasticsearch (probado en v6.2.4)
+# algunas queries útiles para elasticsearch (probado en v7.11)
 #
 # recomendado mover el script al PATH para tenerlo siempre a mano
 
@@ -13,6 +12,7 @@ port='9200'
 action=$1
 index_name=$2
 file_or_query=$3
+update_query=$4
 
 function query()
 {
@@ -22,7 +22,7 @@ function query()
 
 function error_exit()
 {
-    echo -e "\033[1muso: elastic_util.sh [acción] [argumentos]"
+    echo -e "\033[1muso: elastutil [acción] [argumentos]"
     echo ""
     echo -e "acciones:"
     echo ""
@@ -33,12 +33,13 @@ function error_exit()
 - eliminar nombre_indice"
     echo ""
     echo -e "- filtrar nombre_indice \"msg:error and @timestamp:[2019-11-09T00:00:00.000Z TO now]\"
-- borrar nombre_indice \"@timestamp:[now-1M/M TO now-1M/M]\033[0m\""
+- borrar nombre_indice \"@timestamp:[now-1M/M TO now-1M/M]\"
+- actualizar nombre_indice \"state_change:1\" \"state_change=0\"\033[0m"
   echo ""
   echo -e "ejemplos:"
   echo ""
-  echo -e "- hacer legible un output en JSON: \nelastic_util.sh filtrar importer-miprocesado2019.10 \"campo1:100\" 2>/dev/null | python -m json.tool | less"
-  echo -e "- listar los índices con el mes actual en su nombre: \nelastic_util.sh ls | grep 2019.11"
+  echo -e "- hacer legible un output en JSON: \nelastutil filtrar importer-miprocesado2019.10 \"campo1:100\" 2>/dev/null | python -m json.tool | less"
+  echo -e "- listar los índices con el mes actual en su nombre: \nelastutil ls | grep 2019.11"
 }
 
 if [[ -n $action ]]
@@ -124,7 +125,7 @@ then
 
 
     elif [[ $action == "filtrar" ]]
-    then #docs: https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html
+    then #docs: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/query-dsl-query-string-query.html
         if [[ -n $index_name && -n $file_or_query ]]
         then
             query "filtrar en el índice \`$index_name\` con la \"query_string\" $file_or_query" "curl $ip:$port/$index_name/_search -H 'Content-Type: application/json' -d '
@@ -132,6 +133,28 @@ then
     \"query\":
     {
         \"query_string\": {\"query\": \"$file_or_query\"}
+    }
+}'"
+        else
+            echo -e "\033[93m[!] faltan argumentos\033[0m"
+            error_exit
+        fi
+
+
+
+    elif [[ $action == "actualizar" ]]
+    then #docs: https://www.elastic.co/guide/en/elasticsearch/reference/7.11/docs-update-by-query.html
+        if [[ -n $index_name && -n $file_or_query && -n $update_query ]]
+        then
+            query "actualizar docs en el índice \`$index_name\` filtrados por la \"query_string\" $file_or_query" "curl $ip:$port/$index_name/_update_by_query -H 'Content-Type: application/json' -d '
+{
+    \"query\":
+    {
+        \"query_string\": {\"query\": \"$file_or_query\"}
+    },
+    \"script\":
+    {
+        \"source\": \"ctx._source.$update_query;\"
     }
 }'"
         else
